@@ -20,7 +20,8 @@ public class Car : MonoBehaviour
 
 
     public float EnginePower;
-    public float MaxRoatationAngle;
+
+    public AnimationCurve MaxRoatationAngle;
 
     [Space]
     public float Speed;
@@ -132,17 +133,19 @@ public class Car : MonoBehaviour
 
     private void UdpateCar()
     {
+        // отображаем скорость
+        Speed = _rb.linearVelocity.magnitude;
+
         float forwardPower = Math.Clamp(Brain.Acceleration, -0.5f, 1f);
         Vector3 moveForce = EnginePower * Vector3.forward;
 
-        var maxRotationAngle = MaxRoatationAngle * Time.deltaTime;
+        var maxRotationAngle = MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
 
         transform.Rotate(0, angle, 0);
         _rb.AddRelativeForce(moveForce);
 
-        // отображаем скорость
-        Speed = _rb.linearVelocity.magnitude;
+
     }
 
     private void OnDrawGizmos()
