@@ -13,6 +13,14 @@ public abstract class CarProcessor : ScriptableObject
     public RoadPointsState[] Points;
     public float MaxRotationAngle;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="currentPosition">Текущая позиция машины</param>
+    /// <param name="currentSpeed">Вектор скорости машины</param>
+    /// <param name="forwardV">Направление вперёд машины</param>
+    /// <param name="nextWayPointInd">Индекс следующего чек поинта трассы</param>
+    /// <param name="closestRoadPoint">Ближайшая точка трассы</param>
     public abstract void Process(
         Vector3 currentPosition,
         Vector3 currentSpeed,

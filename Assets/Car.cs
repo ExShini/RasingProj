@@ -1,6 +1,7 @@
 using Mono.Cecil;
 using System;
 using System.Linq;
+using System.Xml.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -21,7 +22,10 @@ public class Car : MonoBehaviour
     public float EnginePower;
     public float MaxRoatationAngle;
 
+    [Space]
+    public float Speed;
 
+    [Space]
     public CarProcessor Brain;
 
     public RoadPointsState NextPoint;
@@ -136,11 +140,19 @@ public class Car : MonoBehaviour
 
         transform.Rotate(0, angle, 0);
         _rb.AddRelativeForce(moveForce);
+
+        // отображаем скорость
+        Speed = _rb.linearVelocity.magnitude;
     }
 
     private void OnDrawGizmos()
     {
-        if(_roadPoints == null || _roadPoints.Length == 0)
+        if (UnityEditor.Selection.activeGameObject != gameObject)
+        {
+            return;
+        }
+
+        if (_roadPoints == null || _roadPoints.Length == 0)
             return;
 
         for (int i = 0; i < _roadPoints.Length; i++)
