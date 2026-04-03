@@ -9,8 +9,8 @@ public abstract class CarProcessor : ScriptableObject
     public float AngleRotation { get; protected set; }
 
 
-
-    public RoadPointsState[] Points;
+    // чекпоинты трассы
+    public RoadWayPoint[] WayPoints;
     public float MaxRotationAngle;
 
     /// <summary>

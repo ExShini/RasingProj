@@ -11,10 +11,10 @@ public class TestCarProcessor : CarProcessor
         int nextWayPointInd,
         Vector3 closestRoadPoint)
     {
-        if (Points == null || Points.Length == 0) return;
+        if (WayPoints == null || WayPoints.Length == 0) return;
 
         // 1. Определяем целевую точку (следующую по списку)
-        Vector3 targetPoint = Points[nextWayPointInd].Position;
+        Vector3 targetPoint = WayPoints[nextWayPointInd].Position;
         targetPoint.y = 0;
         currentPosition.y = 0;
 

@@ -10,17 +10,17 @@ public class RasingController : MonoBehaviour
 
     private void Awake()
     {
-        Vector3[] points = new Vector3[Road.waypoints.Count];
+        Vector3[] wayPoints = new Vector3[Road.waypoints.Count];
         int ind = 0;
         foreach(var wPoint  in Road.waypoints)
         {
-            points[ind] = wPoint.position;
+            wayPoints[ind] = wPoint.position;
             ind++;
         }    
 
         foreach (Car car in Cars)
         {
-            car.Init(points);
+            car.Init(wayPoints, Road.generatedPoints, Road.resolution);
         }
     }
 

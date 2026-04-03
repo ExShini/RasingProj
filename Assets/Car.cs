@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 [Serializable]
-public struct RoadPointsState
+public struct RoadWayPoint
 {
     public int Ind;
     public bool Achived;
@@ -29,9 +29,11 @@ public class Car : MonoBehaviour
     [Space]
     public CarProcessor Brain;
 
-    public RoadPointsState NextPoint;
+    public RoadWayPoint NextPoint;
 
-    private RoadPointsState[] _roadPoints;
+    private RoadWayPoint[] _roadWayPoints;
+    private Vector3[] _roadPoints;
+    private int _roadResolution;
 
     private Rigidbody _rb;
     private Transform _trans;
@@ -42,21 +44,27 @@ public class Car : MonoBehaviour
         _trans = GetComponent<Transform>();
     }
 
-    public void Init(Vector3[] roadPoints)
+    public void Init(Vector3[] roadWayPoints, Vector3[] raodPoints, int roadResolution)
     {
-        _roadPoints = new RoadPointsState[roadPoints.Length];
-        for (int i = 0; i < roadPoints.Length; i++)
+        _roadWayPoints = new RoadWayPoint[roadWayPoints.Length];
+        for (int i = 0; i < roadWayPoints.Length; i++)
         {
-            _roadPoints[i] = new RoadPointsState()
+            _roadWayPoints[i] = new RoadWayPoint()
             {
                 Ind = i,
                 Achived = false,
-                Position = roadPoints[i]
+                Position = roadWayPoints[i]
             };
         }
 
+        _roadPoints = new Vector3[raodPoints.Length];
+        raodPoints.CopyTo(_roadPoints, 0 );
+
         if(Brain != null)
-            Brain.Points = _roadPoints;
+        {
+            Brain.WayPoints = new RoadWayPoint[_roadWayPoints.Length];
+            _roadWayPoints.CopyTo(Brain.WayPoints, 0);
+        }
     }
 
     public void Process()
@@ -64,7 +72,7 @@ public class Car : MonoBehaviour
         var currPosition = _trans.position;
         var closestPoint = GetClosestRoadPoint(currPosition);
 
-        var nextWayPoint = _roadPoints.First(x => x.Achived == false);
+        var nextWayPoint = _roadWayPoints.First(x => x.Achived == false);
         NextPoint = nextWayPoint;
 
         Brain.Process(currPosition, _rb.linearVelocity, transform.forward, nextWayPoint.Ind, closestPoint);
@@ -73,20 +81,20 @@ public class Car : MonoBehaviour
 
     public void CheckAchived()
     {
-        var point = _roadPoints[NextPoint.Ind];
+        var point = _roadWayPoints[NextPoint.Ind];
 
         var distVect = point.Position - this.transform.position;
         distVect.y = 0;
         if (distVect.sqrMagnitude <= AchiveDistSqr)
         {
             point.Achived = true;
-            _roadPoints[NextPoint.Ind] = point;
+            _roadWayPoints[NextPoint.Ind] = point;
 
             int nextPointInd = NextPoint.Ind + 1;
-            if(nextPointInd >= _roadPoints.Length)
+            if(nextPointInd >= _roadWayPoints.Length)
                 nextPointInd = 0;
 
-            NextPoint = _roadPoints[nextPointInd];
+            NextPoint = _roadWayPoints[nextPointInd];
         }
     }
 
@@ -94,29 +102,46 @@ public class Car : MonoBehaviour
     public Vector3 GetClosestRoadPoint(Vector3 currentPos)
     {
         int closestIndex = 0;
-        if (_roadPoints == null || _roadPoints.Length == 0) return currentPos;
+        int secondClosest = 1;
+        if (_roadWayPoints == null || _roadWayPoints.Length == 0) return currentPos;
 
         float minDistanceSqr = float.MaxValue;
 
-        // 1. Ищем ближайший индекс в массиве
-        for (int i = 0; i < _roadPoints.Length; i++)
+        // 1. Ищем ближайший индекс в массиве маршрутных точек
+        for (int i = 0; i < _roadWayPoints.Length; i++)
         {
-            float distSqr = (currentPos - _roadPoints[i].Position).sqrMagnitude;
+            float distSqr = (currentPos - _roadWayPoints[i].Position).sqrMagnitude;
             if (distSqr < minDistanceSqr)
             {
                 minDistanceSqr = distSqr;
+                secondClosest = closestIndex;
                 closestIndex = i;
             }
         }
 
-        // 2. Уточняем положение между сегментами (Проекция на отрезок)
-        int prevIndex = (closestIndex + _roadPoints.Length - 1) % _roadPoints.Length;
-        int nextIndex = (closestIndex + 1) % _roadPoints.Length;
+        // 2. Уточняем положение между сегментами за счёт детальной коллекции
+        // точек дороги
+        int minWayPointInd = Math.Min(closestIndex, secondClosest);
+        int maxWayPointInd = Mathf.Max(closestIndex, secondClosest);
 
-        Vector3 p1 = ProjectPointOnLineSegment(_roadPoints[prevIndex].Position, _roadPoints[closestIndex].Position, currentPos);
-        Vector3 p2 = ProjectPointOnLineSegment(_roadPoints[closestIndex].Position, _roadPoints[nextIndex].Position, currentPos);
+        int minRoadPointInd = minWayPointInd * _roadResolution;
+        int maxRoadPointInd = maxWayPointInd * _roadResolution;
 
-        return (currentPos - p1).sqrMagnitude < (currentPos - p2).sqrMagnitude ? p1 : p2;
+        float sqrMinDist = float.MaxValue;
+        int roadPointClosestInd = 0;
+        currentPos.y = 0;
+        for(int i = minRoadPointInd; i < maxRoadPointInd; i++)
+        {
+            var pointPosition = _roadPoints[i];
+            var sqrDist = (currentPos - pointPosition).sqrMagnitude;
+            if(sqrDist < sqrMinDist)
+            {
+                sqrMinDist = sqrDist;
+                roadPointClosestInd = i;
+            }
+        }
+
+        return _roadPoints[roadPointClosestInd];
     }
 
     // Вспомогательная функция проекции точки на отрезок
@@ -155,12 +180,12 @@ public class Car : MonoBehaviour
             return;
         }
 
-        if (_roadPoints == null || _roadPoints.Length == 0)
+        if (_roadWayPoints == null || _roadWayPoints.Length == 0)
             return;
 
-        for (int i = 0; i < _roadPoints.Length; i++)
+        for (int i = 0; i < _roadWayPoints.Length; i++)
         {
-            var point = _roadPoints[i];
+            var point = _roadWayPoints[i];
             var color = point.Achived ? Color.green : Color.red;
             Gizmos.color = color;
 
