@@ -11,6 +11,7 @@ public abstract class CarProcessor : ScriptableObject
 
     // чекпоинты трассы
     public RoadWayPoint[] WayPoints;
+    public float RoadWidth;
     public float MaxRotationAngle;
 
     /// <summary>

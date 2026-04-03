@@ -34,6 +34,7 @@ public class Car : MonoBehaviour
     private RoadWayPoint[] _roadWayPoints;
     private Vector3[] _roadPoints;
     private int _roadResolution;
+    float _roadWidth;
 
     private Rigidbody _rb;
     private Transform _trans;
@@ -44,7 +45,11 @@ public class Car : MonoBehaviour
         _trans = GetComponent<Transform>();
     }
 
-    public void Init(Vector3[] roadWayPoints, Vector3[] raodPoints, int roadResolution)
+    public void Init(
+        Vector3[] roadWayPoints, 
+        Vector3[] raodPoints, 
+        int roadResolution,
+        float roadWidth)
     {
         _roadWayPoints = new RoadWayPoint[roadWayPoints.Length];
         for (int i = 0; i < roadWayPoints.Length; i++)
@@ -58,12 +63,15 @@ public class Car : MonoBehaviour
         }
 
         _roadPoints = new Vector3[raodPoints.Length];
-        raodPoints.CopyTo(_roadPoints, 0 );
+        raodPoints.CopyTo(_roadPoints, 0);
+        _roadWidth = roadWidth;
 
         if(Brain != null)
         {
             Brain.WayPoints = new RoadWayPoint[_roadWayPoints.Length];
             _roadWayPoints.CopyTo(Brain.WayPoints, 0);
+
+            Brain.RoadWidth = roadWidth;
         }
     }
 
@@ -74,6 +82,9 @@ public class Car : MonoBehaviour
 
         var nextWayPoint = _roadWayPoints.First(x => x.Achived == false);
         NextPoint = nextWayPoint;
+
+        // передаём мозгу актуальные параметры
+        UpdateBrainParameters();
 
         Brain.Process(currPosition, _rb.linearVelocity, transform.forward, nextWayPoint.Ind, closestPoint);
         UdpateCar();
@@ -156,6 +167,14 @@ public class Car : MonoBehaviour
     }
 
 
+    private void UpdateBrainParameters()
+    {
+        var speed = _rb.linearVelocity.magnitude;
+        var maxRotationAngle = MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
+    
+        Brain.MaxRotationAngle = maxRotationAngle;
+    }
+
     private void UdpateCar()
     {
         // отображаем скорость
@@ -169,8 +188,6 @@ public class Car : MonoBehaviour
 
         transform.Rotate(0, angle, 0);
         _rb.AddRelativeForce(moveForce);
-
-
     }
 
     private void OnDrawGizmos()

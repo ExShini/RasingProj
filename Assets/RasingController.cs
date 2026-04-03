@@ -20,7 +20,7 @@ public class RasingController : MonoBehaviour
 
         foreach (Car car in Cars)
         {
-            car.Init(wayPoints, Road.generatedPoints, Road.resolution);
+            car.Init(wayPoints, Road.generatedPoints, Road.resolution, Road.roadWidth);
         }
     }
 

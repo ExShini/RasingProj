@@ -20,7 +20,7 @@ public class TestCarProcessor : CarProcessor
 
         Vector3 directionToTarget = (targetPoint - currentPosition).normalized;
 
-        // —читаем угол в градусах (от 0 до 180)
+        // —читаем угол в градусах (от -180 до 180)
         float angle = Vector3.SignedAngle(forwardV.normalized, directionToTarget, Vector3.up);
         AngleRotation = angle;
 
