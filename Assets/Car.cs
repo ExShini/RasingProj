@@ -62,8 +62,9 @@ public class Car : MonoBehaviour
         _roadPoints = new Vector3[raodPoints.Length];
         raodPoints.CopyTo(_roadPoints, 0);
         _roadWidth = roadWidth;
+        _roadResolution = roadResolution;
 
-        if(Brain != null)
+        if (Brain != null)
         {
             Brain.WayPoints = new RoadWayPoint[_roadWayPoints.Length];
             _roadWayPoints.CopyTo(Brain.WayPoints, 0);
