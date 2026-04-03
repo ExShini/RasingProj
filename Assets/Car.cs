@@ -18,10 +18,7 @@ public class Car : MonoBehaviour
     private const float AchiveDist = 1.5f;
     private const float AchiveDistSqr = AchiveDist * AchiveDist;
 
-
-    public float EnginePower;
-
-    public AnimationCurve MaxRoatationAngle;
+    public CarSettings Settings;
 
     [Space]
     public float Speed;
@@ -87,7 +84,7 @@ public class Car : MonoBehaviour
         UpdateBrainParameters();
 
         Brain.Process(currPosition, _rb.linearVelocity, transform.forward, nextWayPoint.Ind, closestPoint);
-        UdpateCar();
+        UdpateCar(closestPoint);
     }
 
     public void CheckAchived()
@@ -113,7 +110,6 @@ public class Car : MonoBehaviour
     public Vector3 GetClosestRoadPoint(Vector3 currentPos)
     {
         int closestIndex = 0;
-        int secondClosest = 1;
         if (_roadWayPoints == null || _roadWayPoints.Length == 0) return currentPos;
 
         float minDistanceSqr = float.MaxValue;
@@ -122,37 +118,52 @@ public class Car : MonoBehaviour
         for (int i = 0; i < _roadWayPoints.Length; i++)
         {
             float distSqr = (currentPos - _roadWayPoints[i].Position).sqrMagnitude;
+            
             if (distSqr < minDistanceSqr)
             {
                 minDistanceSqr = distSqr;
-                secondClosest = closestIndex;
                 closestIndex = i;
             }
         }
 
         // 2. Уточняем положение между сегментами за счёт детальной коллекции
         // точек дороги
-        int minWayPointInd = Math.Min(closestIndex, secondClosest);
-        int maxWayPointInd = Mathf.Max(closestIndex, secondClosest);
 
-        int minRoadPointInd = minWayPointInd * _roadResolution;
-        int maxRoadPointInd = maxWayPointInd * _roadResolution;
+        float closestDist = float.MaxValue;
+        Vector3 closestPoint = Vector3.zero;
 
-        float sqrMinDist = float.MaxValue;
+        CheckRoadPart(closestIndex - 1, currentPos, ref closestDist, ref closestPoint);
+        CheckRoadPart(closestIndex, currentPos, ref closestDist, ref closestPoint);
+
+        return closestPoint;
+    }
+
+
+    private void CheckRoadPart(int startPointInd, Vector3 currentPos, ref float closestDist, ref Vector3 closestPoint)
+    {
+        if (startPointInd < 0)
+            startPointInd += _roadWayPoints.Length;
+
+        if(startPointInd >=  _roadWayPoints.Length)
+            startPointInd -= _roadWayPoints.Length;
+
         int roadPointClosestInd = 0;
         currentPos.y = 0;
-        for(int i = minRoadPointInd; i < maxRoadPointInd; i++)
+
+        int startInd = startPointInd * _roadResolution;
+
+        for (int i = startInd; i < startInd + _roadResolution; i++)
         {
             var pointPosition = _roadPoints[i];
             var sqrDist = (currentPos - pointPosition).sqrMagnitude;
-            if(sqrDist < sqrMinDist)
+            if (sqrDist < closestDist)
             {
-                sqrMinDist = sqrDist;
+                closestDist = sqrDist;
                 roadPointClosestInd = i;
             }
         }
 
-        return _roadPoints[roadPointClosestInd];
+        closestPoint = _roadPoints[roadPointClosestInd];
     }
 
     // Вспомогательная функция проекции точки на отрезок
@@ -170,20 +181,31 @@ public class Car : MonoBehaviour
     private void UpdateBrainParameters()
     {
         var speed = _rb.linearVelocity.magnitude;
-        var maxRotationAngle = MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
+        var maxRotationAngle = Settings.MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
     
         Brain.MaxRotationAngle = maxRotationAngle;
     }
 
-    private void UdpateCar()
+    private void UdpateCar(Vector3 closestPoint)
     {
+        var currPosition = transform.position;
+        currPosition.y = 0f;
+        closestPoint.y = 0f;
+
+        var dist = (currPosition - closestPoint).magnitude;
+        dist -= _roadWidth / 2;
+        dist = Math.Max(dist, 0f);
+
+        var damping = Settings.RoadOffsetLinerDamping.Evaluate(dist);
+        _rb.linearDamping = damping;
+
         // отображаем скорость
         Speed = _rb.linearVelocity.magnitude;
 
         float forwardPower = Math.Clamp(Brain.Acceleration, -0.5f, 1f);
-        Vector3 moveForce = EnginePower * Vector3.forward;
+        Vector3 moveForce = Settings.EnginePower * Vector3.forward;
 
-        var maxRotationAngle = MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
+        var maxRotationAngle = Settings.MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
 
         transform.Rotate(0, angle, 0);
