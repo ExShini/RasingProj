@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 25fd08288dd24a3489cc7aef953ae554
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 215152
+  packageName: Rally Cars
+  packageVersion: 1.0
+  assetPath: Assets/Ash Assets/Rally Cars/Scenes/DemoScene/LightingData.asset
+  uploadId: 589983
