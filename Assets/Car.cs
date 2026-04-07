@@ -148,7 +148,7 @@ public class Car : MonoBehaviour
         if(startPointInd >=  _roadWayPoints.Length)
             startPointInd -= _roadWayPoints.Length;
 
-        int roadPointClosestInd = 0;
+        int roadPointClosestInd = -1;
         currentPos.y = 0;
 
         int startInd = startPointInd * _roadResolution;
@@ -164,20 +164,9 @@ public class Car : MonoBehaviour
             }
         }
 
-        closestPoint = _roadPoints[roadPointClosestInd];
+        if(roadPointClosestInd >= 0)
+            closestPoint = _roadPoints[roadPointClosestInd];
     }
-
-    // Вспомогательная функция проекции точки на отрезок
-    private Vector3 ProjectPointOnLineSegment(Vector3 start, Vector3 end, Vector3 point)
-    {
-        Vector3 line = end - start;
-        float len = line.magnitude;
-        line.Normalize();
-
-        float projectLength = Mathf.Clamp(Vector3.Dot(point - start, line), 0f, len);
-        return start + line * projectLength;
-    }
-
 
     private void UpdateBrainParameters()
     {
