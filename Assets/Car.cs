@@ -78,7 +78,7 @@ public class Car : MonoBehaviour
         var currPosition = _trans.position;
         var closestPoint = GetClosestRoadPoint(currPosition);
 
-        var nextWayPoint = _roadWayPoints.First(x => x.Achived == false);
+        var nextWayPoint = _roadWayPoints.FirstOrDefault(x => x.Achived == false);
         NextPoint = nextWayPoint;
 
         // передаём мозгу актуальные параметры
@@ -100,8 +100,17 @@ public class Car : MonoBehaviour
             _roadWayPoints[NextPoint.Ind] = point;
 
             int nextPointInd = NextPoint.Ind + 1;
+
+            // если завершили круг - сбрасываем достижения точек
             if(nextPointInd >= _roadWayPoints.Length)
+            {
                 nextPointInd = 0;
+                for(int i = 0; i < _roadWayPoints.Length; i++)
+                {
+                    var pointToReset = _roadWayPoints[i];
+                    pointToReset.Achived = false;
+                }
+            }
 
             NextPoint = _roadWayPoints[nextPointInd];
         }
