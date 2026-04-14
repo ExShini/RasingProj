@@ -202,7 +202,7 @@ public class Car : MonoBehaviour
         Speed = _rb.linearVelocity.magnitude;
 
         float forwardPower = Math.Clamp(Brain.Acceleration, -0.5f, 1f);
-        Vector3 moveForce = Settings.EnginePower * Vector3.forward;
+        Vector3 moveForce = Settings.EnginePower * forwardPower * Vector3.forward;
 
         var maxRotationAngle = Settings.MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
