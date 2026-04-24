@@ -25,8 +25,12 @@ public class Car : MonoBehaviour
 
     public RoadWayPoint NextPoint;
 
+    // чек поинты, машина должна пересечь их все в течении одного круга гонки
     private RoadWayPoint[] _roadWayPoints;
+
+    // детализированные точки дороги
     private Vector3[] _roadPoints;
+
     private int _roadResolution;
     
     float _roadWidth;
@@ -69,6 +73,10 @@ public class Car : MonoBehaviour
             Brain.WayPoints = new RoadWayPoint[_roadWayPoints.Length];
             _roadWayPoints.CopyTo(Brain.WayPoints, 0);
 
+            Brain.DetailRoadPoints = new Vector3[_roadPoints.Length];
+            _roadPoints.CopyTo(Brain.DetailRoadPoints, 0);
+
+            Brain.RaodResolution = roadResolution;
             Brain.RoadWidth = roadWidth;
         }
     }
