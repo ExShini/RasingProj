@@ -29,6 +29,10 @@ public class RasingController : MonoBehaviour
         for (int i = 0; i < Cars.Count; i++)
         {
             var car = Cars[i];
+            
+            if(car == null)
+                continue;
+
             car.Process();
             car.CheckAchived();
         }

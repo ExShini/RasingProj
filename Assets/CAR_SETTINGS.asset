@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 123aeb3aa5123bc4d93c63403359fe64, type: 3}
   m_Name: CAR_SETTINGS
   m_EditorClassIdentifier: Assembly-CSharp::CarSettings
-  EnginePower: 300
+  EnginePower: 250
   MaxRoatationAngle:
     serializedVersion: 2
     m_Curve:

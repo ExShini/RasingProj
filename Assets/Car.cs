@@ -15,9 +15,6 @@ public struct RoadWayPoint
 
 public class Car : MonoBehaviour
 {
-    private const float AchiveDist = 1.5f;
-    private const float AchiveDistSqr = AchiveDist * AchiveDist;
-
     public CarSettings Settings;
 
     [Space]
@@ -31,7 +28,9 @@ public class Car : MonoBehaviour
     private RoadWayPoint[] _roadWayPoints;
     private Vector3[] _roadPoints;
     private int _roadResolution;
+    
     float _roadWidth;
+    private float _achiveDistSqr;
 
     private Rigidbody _rb;
     private Transform _trans;
@@ -62,6 +61,7 @@ public class Car : MonoBehaviour
         _roadPoints = new Vector3[raodPoints.Length];
         raodPoints.CopyTo(_roadPoints, 0);
         _roadWidth = roadWidth;
+        _achiveDistSqr = math.pow(_roadWidth, 2);
         _roadResolution = roadResolution;
 
         if (Brain != null)
@@ -75,6 +75,9 @@ public class Car : MonoBehaviour
 
     public void Process()
     {
+        if (enabled == false)
+            return;
+
         var currPosition = _trans.position;
         var closestPoint = GetClosestRoadPoint(currPosition);
 
@@ -94,7 +97,7 @@ public class Car : MonoBehaviour
 
         var distVect = point.Position - this.transform.position;
         distVect.y = 0;
-        if (distVect.sqrMagnitude <= AchiveDistSqr)
+        if (distVect.sqrMagnitude <= _achiveDistSqr)
         {
             point.Achived = true;
             _roadWayPoints[NextPoint.Ind] = point;
