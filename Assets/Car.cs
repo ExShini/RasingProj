@@ -195,7 +195,11 @@ public class Car : MonoBehaviour
         dist -= _roadWidth / 2;
         dist = Math.Max(dist, 0f);
 
-        var damping = Settings.RoadOffsetLinerDamping.Evaluate(dist);
+        float forwAngle = Vector3.SignedAngle(transform.forward.normalized, _rb.linearVelocity.normalized, Vector3.up);
+        float absForwAngle = math.abs(forwAngle);
+
+        var damping = Settings.CarDampingByAngle.Evaluate(absForwAngle);
+        damping *= Settings.RoadOffsetLinerDamping.Evaluate(dist);
         _rb.linearDamping = damping;
 
         // отображаем скорость
