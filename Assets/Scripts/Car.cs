@@ -47,7 +47,7 @@ public class Car : MonoBehaviour
 
     public void Init(
         Vector3[] roadWayPoints, 
-        Vector3[] raodPoints, 
+        Vector3[] roadPoints, 
         int roadResolution,
         float roadWidth)
     {
@@ -62,8 +62,8 @@ public class Car : MonoBehaviour
             };
         }
 
-        _roadPoints = new Vector3[raodPoints.Length];
-        raodPoints.CopyTo(_roadPoints, 0);
+        _roadPoints = new Vector3[roadPoints.Length];
+        roadPoints.CopyTo(_roadPoints, 0);
         _roadWidth = roadWidth;
         _achiveDistSqr = math.pow(_roadWidth, 2);
         _roadResolution = roadResolution;

@@ -10,10 +10,31 @@ public enum AbilityType
 
 public class AbilityData
 {
-    public AbilityType Type;
-    public int ActivationNum;
-    public float RechargeTime;
-    public float RechargeDuration;
+    public AbilityType Type { get; private set; }
+    public int ActivationNum { get; private set; }
+    public float RechargeTime { get; private set; }
+    public float RechargeDuration {  get; private set; }
+
+    public AbilityData(AbilityType type, int activationNum, float rechDuration)
+    {
+        Type = type;
+        ActivationNum = activationNum;
+        RechargeDuration = rechDuration;
+    }
+
+    public void AddActivations(int activationNumToAdd)
+    {
+        ActivationNum += activationNumToAdd;
+    }
+
+    public void Recharge(float deltaTime)
+    {
+        RechargeTime -= deltaTime;
+        if (RechargeTime < 0)
+        {
+            RechargeTime = 0;
+        }
+    }
 }
 
 public class CarAbilityController
@@ -30,13 +51,8 @@ public class CarAbilityController
     {
         _abilities = new List<AbilityData>()
         {
-            new AbilityData()
-            {
-                Type = AbilityType.Nitro,
-                ActivationNum = NitroStartNum,
-                RechargeTime = 0,
-                RechargeDuration = NitroRecharge,
-            },
+            new AbilityData(AbilityType.Nitro, NitroStartNum, NitroRecharge),
+            
         };
 
         _abilitiesByType = new Dictionary<AbilityType, AbilityData>();
@@ -48,7 +64,7 @@ public class CarAbilityController
 
     public void Update(float deltaTime)
     {
-
+        UpdateRecharge(deltaTime);
     }
 
     private void UpdateRecharge(float deltaTime)
@@ -58,11 +74,7 @@ public class CarAbilityController
             var ability = _abilities[i];
             if(ability.RechargeTime > 0)
             {
-                ability.RechargeTime -= deltaTime;
-                if(ability.RechargeTime < 0)
-                {
-                    ability.RechargeTime = 0;
-                }
+                ability.Recharge(deltaTime);
             }
         }
     }
@@ -72,8 +84,16 @@ public class CarAbilityController
         return false;
     }
 
-    public bool AbilityReadyActive(AbilityType abType)
+    public bool AbilityIsReady(AbilityType abType)
     {
-        return false;
+        if(_abilitiesByType.ContainsKey(abType) == false)
+        {
+            return false;
+        }
+
+        var abData = _abilitiesByType[abType];
+        bool isReady = abData.RechargeTime <= 0 && abData.ActivationNum > 0;
+
+        return isReady;
     }
 }
