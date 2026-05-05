@@ -8,6 +8,8 @@ public abstract class CarProcessor : ScriptableObject
     // ограничен настройками машины
     public float AngleRotation { get; protected set; }
 
+    public CarAbilityController AbilityController { get; set; }
+
 
     // чекпоинты трассы
     public RoadWayPoint[] WayPoints;

@@ -7,4 +7,5 @@ public class CarSettings : ScriptableObject
     public AnimationCurve MaxRoatationAngle;
     public AnimationCurve RoadOffsetLinerDamping;
     public AnimationCurve CarDampingByAngle;
+    
 }

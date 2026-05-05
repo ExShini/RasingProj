@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 
 public enum AbilityType
@@ -7,19 +6,24 @@ public enum AbilityType
     Nitro,
 }
 
-
 public class AbilityData
 {
     public AbilityType Type { get; private set; }
     public int ActivationNum { get; private set; }
     public float RechargeTime { get; private set; }
-    public float RechargeDuration {  get; private set; }
+    public float RechargeDuration { get; private set; }
+    public float ActiveTime { get; private set; }
+    public float ActiveDuration { get; private set; }
+    public float PowerMultiplier { get; private set; }
 
-    public AbilityData(AbilityType type, int activationNum, float rechDuration)
+    public AbilityData(AbilityType type, int activationNum, float rechDuration,
+                       float activeDuration, float powerMultiplier)
     {
         Type = type;
         ActivationNum = activationNum;
         RechargeDuration = rechDuration;
+        ActiveDuration = activeDuration;
+        PowerMultiplier = powerMultiplier;
     }
 
     public void AddActivations(int activationNumToAdd)
@@ -27,14 +31,33 @@ public class AbilityData
         ActivationNum += activationNumToAdd;
     }
 
-    public void Recharge(float deltaTime)
+    public void Activate()
     {
-        RechargeTime -= deltaTime;
-        if (RechargeTime < 0)
+        ActivationNum--;
+        ActiveTime = ActiveDuration;
+        RechargeTime = RechargeDuration;
+    }
+
+    public void Update(float deltaTime)
+    {
+        if (ActiveTime > 0)
         {
-            RechargeTime = 0;
+            ActiveTime -= deltaTime;
+            if (ActiveTime < 0)
+                ActiveTime = 0;
+            return;
+        }
+
+        if (RechargeTime > 0)
+        {
+            RechargeTime -= deltaTime;
+            if (RechargeTime < 0)
+                RechargeTime = 0;
         }
     }
+
+    public bool IsActive { get { return ActiveTime > 0; } }
+    public bool IsReady { get { return RechargeTime <= 0 && ActivationNum > 0; } }
 }
 
 public class CarAbilityController
@@ -42,7 +65,7 @@ public class CarAbilityController
     private const int NitroStartNum = 2;
     private const float NitroRecharge = 5f;
     private const float NitroDuration = 1.5f;
-
+    private const float NitroPowerMultiplier = 2.5f;
 
     private List<AbilityData> _abilities;
     private Dictionary<AbilityType, AbilityData> _abilitiesByType;
@@ -51,12 +74,12 @@ public class CarAbilityController
     {
         _abilities = new List<AbilityData>()
         {
-            new AbilityData(AbilityType.Nitro, NitroStartNum, NitroRecharge),
-            
+            new AbilityData(AbilityType.Nitro, NitroStartNum, NitroRecharge,
+                            NitroDuration, NitroPowerMultiplier),
         };
 
         _abilitiesByType = new Dictionary<AbilityType, AbilityData>();
-        foreach(var ability in _abilities)
+        foreach (var ability in _abilities)
         {
             _abilitiesByType[ability.Type] = ability;
         }
@@ -64,36 +87,56 @@ public class CarAbilityController
 
     public void Update(float deltaTime)
     {
-        UpdateRecharge(deltaTime);
+        foreach (var ability in _abilities)
+        {
+            ability.Update(deltaTime);
+        }
     }
 
-    private void UpdateRecharge(float deltaTime)
+    public bool UseAbility(AbilityType abType)
     {
-        for (int i = 0; i < _abilities.Count; i++)
+        if (!_abilitiesByType.TryGetValue(abType, out var abData))
+            return false;
+
+        if (!abData.IsReady)
+            return false;
+
+        abData.Activate();
+        return true;
+    }
+
+    public bool IsAbilityActive(AbilityType abType)
+    {
+        return _abilitiesByType.TryGetValue(abType, out var abData) && abData.IsActive;
+    }
+
+    public bool IsAbilityReady(AbilityType abType)
+    {
+        return _abilitiesByType.TryGetValue(abType, out var abData) && abData.IsReady;
+    }
+
+    public float GetPowerMultiplier()
+    {
+        float multiplier = 1f;
+        foreach (var ability in _abilities)
         {
-            var ability = _abilities[i];
-            if(ability.RechargeTime > 0)
+            if (ability.IsActive && ability.PowerMultiplier > multiplier)
             {
-                ability.Recharge(deltaTime);
+                multiplier = ability.PowerMultiplier;
             }
         }
+        return multiplier;
     }
 
-    public bool AbilityIsActive(AbilityType abType)
+    public int GetActivationsLeft(AbilityType abType)
     {
-        return false;
+        return _abilitiesByType.TryGetValue(abType, out var abData) ? abData.ActivationNum : 0;
     }
 
-    public bool AbilityIsReady(AbilityType abType)
+    public float GetRechargeProgress(AbilityType abType)
     {
-        if(_abilitiesByType.ContainsKey(abType) == false)
-        {
-            return false;
-        }
-
-        var abData = _abilitiesByType[abType];
-        bool isReady = abData.RechargeTime <= 0 && abData.ActivationNum > 0;
-
-        return isReady;
+        if (!_abilitiesByType.TryGetValue(abType, out var abData) || abData.RechargeDuration <= 0)
+            return 1f;
+        return 1f - (abData.RechargeTime / abData.RechargeDuration);
     }
 }

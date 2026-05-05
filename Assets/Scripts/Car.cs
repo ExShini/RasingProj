@@ -25,10 +25,10 @@ public class Car : MonoBehaviour
 
     public RoadWayPoint NextPoint;
 
-    // чек поинты, машина должна пересечь их все в течении одного круга гонки
+    // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     private RoadWayPoint[] _roadWayPoints;
 
-    // детализированные точки дороги
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     private Vector3[] _roadPoints;
 
     private int _roadResolution;
@@ -36,11 +36,14 @@ public class Car : MonoBehaviour
     float _roadWidth;
     private float _achiveDistSqr;
 
+    private CarAbilityController _abilityController;
+
     private Rigidbody _rb;
     private Transform _trans;
 
     private void Awake()
     {
+        _abilityController = new CarAbilityController();
         _rb = GetComponent<Rigidbody>();
         _trans = GetComponent<Transform>();
     }
@@ -78,6 +81,7 @@ public class Car : MonoBehaviour
 
             Brain.RaodResolution = roadResolution;
             Brain.RoadWidth = roadWidth;
+            Brain.AbilityController = _abilityController;
         }
     }
 
@@ -92,7 +96,9 @@ public class Car : MonoBehaviour
         var nextWayPoint = _roadWayPoints.FirstOrDefault(x => x.Achived == false);
         NextPoint = nextWayPoint;
 
-        // передаём мозгу актуальные параметры
+        _abilityController.Update(Time.fixedDeltaTime);
+
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         UpdateBrainParameters();
 
         Brain.Process(currPosition, _rb.linearVelocity, transform.forward, nextWayPoint.Ind, closestPoint);
@@ -112,7 +118,7 @@ public class Car : MonoBehaviour
 
             int nextPointInd = NextPoint.Ind + 1;
 
-            // если завершили круг - сбрасываем достижения точек
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             if(nextPointInd >= _roadWayPoints.Length)
             {
                 nextPointInd = 0;
@@ -135,7 +141,7 @@ public class Car : MonoBehaviour
 
         float minDistanceSqr = float.MaxValue;
 
-        // 1. Ищем ближайший индекс в массиве маршрутных точек
+        // 1. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         for (int i = 0; i < _roadWayPoints.Length; i++)
         {
             float distSqr = (currentPos - _roadWayPoints[i].Position).sqrMagnitude;
@@ -147,8 +153,8 @@ public class Car : MonoBehaviour
             }
         }
 
-        // 2. Уточняем положение между сегментами за счёт детальной коллекции
-        // точек дороги
+        // 2. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
         float closestDist = float.MaxValue;
         Vector3 closestPoint = Vector3.zero;
@@ -213,11 +219,12 @@ public class Car : MonoBehaviour
         damping *= Settings.RoadOffsetLinerDamping.Evaluate(dist);
         _rb.linearDamping = damping;
 
-        // отображаем скорость
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Speed = _rb.linearVelocity.magnitude;
 
         float forwardPower = Math.Clamp(Brain.Acceleration, -0.5f, 1f);
-        Vector3 moveForce = Settings.EnginePower * forwardPower * Vector3.forward;
+        float powerMultiplier = _abilityController.GetPowerMultiplier();
+        Vector3 moveForce = Settings.EnginePower * forwardPower * powerMultiplier * Vector3.forward;
 
         var maxRotationAngle = Settings.MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
