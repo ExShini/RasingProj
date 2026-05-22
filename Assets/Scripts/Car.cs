@@ -222,7 +222,7 @@ public class Car : MonoBehaviour
         // ���������� ��������
         Speed = _rb.linearVelocity.magnitude;
 
-        float forwardPower = Math.Clamp(Brain.Acceleration, -0.5f, 1f);
+        float forwardPower = Math.Clamp(Brain.Acceleration, -1f, 1f);
         float powerMultiplier = _abilityController.GetPowerMultiplier();
         Vector3 moveForce = Settings.EnginePower * forwardPower * powerMultiplier * Vector3.forward;
 
