@@ -2,21 +2,21 @@ using UnityEngine;
 
 public abstract class CarProcessor : ScriptableObject
 {
-    // значения от -0.5f до 1f
+    // РЈСЃРєРѕСЂРµРЅРёРµ РѕС‚ -1f РґРѕ 1f
     public float Acceleration { get; protected set; }
     
-    // ограничен настройками машины
+    // РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СѓРіРѕР» РїРѕРІРѕСЂРѕС‚Р°
     public float AngleRotation { get; protected set; }
 
     public CarAbilityController AbilityController { get; set; }
 
 
-    // чекпоинты трассы
+    // РћРїРѕСЂРЅС‹Рµ С‚РѕС‡РєРё РїСѓС‚Рё
     public RoadWayPoint[] WayPoints;
-    // детализированные точки дороги
+    // Р”РµС‚Р°Р»РёР·РёСЂРѕРІР°РЅРЅС‹Рµ С‚РѕС‡РєРё РїСѓС‚Рё
     public Vector3[] DetailRoadPoints;
 
-    // количество "точек дороги" между каждыми двумя чекпоинтами
+    // РљРѕР»РёС‡РµСЃС‚РІРѕ "С‚РѕС‡РµРє РїСѓС‚Рё" РјРµР¶РґСѓ РґРІСѓРјСЏ РѕРїРѕСЂРЅС‹РјРё
     public int RaodResolution;
 
     public float RoadWidth;
@@ -25,11 +25,11 @@ public abstract class CarProcessor : ScriptableObject
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="currentPosition">Текущая позиция машины</param>
-    /// <param name="currentSpeed">Вектор скорости машины</param>
-    /// <param name="forwardV">Направление вперёд машины</param>
-    /// <param name="nextWayPointInd">Индекс следующего чек поинта трассы</param>
-    /// <param name="closestRoadPoint">Ближайшая точка трассы</param>
+    /// <param name="currentPosition">РўРµРєСѓС‰Р°СЏ РїРѕР·РёС†РёСЏ РјР°С€РёРЅС‹</param>
+    /// <param name="currentSpeed">Р’РµРєС‚РѕСЂ СЃРєРѕСЂРѕСЃС‚Рё РјР°С€РёРЅС‹</param>
+    /// <param name="forwardV">РќР°РїСЂР°РІР»РµРЅРёРµ РІРїРµСЂС‘Рґ РјР°С€РёРЅС‹</param>
+    /// <param name="nextWayPointInd">РРЅРґРµРєСЃ СЃР»РµРґСѓСЋС‰РµР№ РѕРїРѕСЂРЅРѕР№ С‚РѕС‡РєРё</param>
+    /// <param name="closestRoadPoint">Р‘Р»РёР¶Р°Р№С€Р°СЏ С‚РѕС‡РєР° РґРѕСЂРѕРіРё</param>
     public abstract void Process(
         Vector3 currentPosition,
         Vector3 currentSpeed,

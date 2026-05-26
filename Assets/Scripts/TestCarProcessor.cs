@@ -13,18 +13,18 @@ public class TestCarProcessor : CarProcessor
     {
         if (WayPoints == null || WayPoints.Length == 0) return;
 
-        // 1. ���������� ������� ����� (��������� �� ������)
+        // 1. Получаем целевую точку (следующую на очереди)
         Vector3 targetPoint = WayPoints[nextWayPointInd].Position;
         targetPoint.y = 0;
         currentPosition.y = 0;
 
         Vector3 directionToTarget = (targetPoint - currentPosition).normalized;
 
-        // ������� ���� � �������� (�� -180 �� 180)
+        // Вычисляем угол к цели (от -180 до 180)
         float angle = Vector3.SignedAngle(forwardV.normalized, directionToTarget, Vector3.up);
         AngleRotation = angle;
 
-        // ������ ��� �� ������
+        // Просто едем вперёд
         Acceleration = 1f;
 
     }

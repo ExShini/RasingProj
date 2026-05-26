@@ -10,23 +10,23 @@ public class SmoothRoadGenerator : MonoBehaviour
     [Range(2, 50)] public int resolution = 15;
 
     [Header("Generated Data")]
-    public Vector3[] generatedPoints; // ����������� ����� �������� ����
+    public Vector3[] generatedPoints; // Сгенерированные точки центра дороги
 
     [Header("Environment Settings")]
-    public GameObject[] envPrefabs; // ������ �������� (�������, �����, �����)
-    public float spawnProbability = 0.2f; // ����������� ������ � ������ ����� (0..1)
-    public float distanceFromCenter = 1.5f; // �� ����� ���������� �� ������ ������ �������
-    public Transform propsContainer; // ���� ����� ������������ �������
+    public GameObject[] envPrefabs; // Объекты окружения (деревья, кусты, камни)
+    public float spawnProbability = 0.2f; // Вероятность спавна в каждой точке (0..1)
+    public float distanceFromCenter = 1.5f; // На сколько отступать от центра дороги
+    public Transform propsContainer; // Куда складывать созданные объекты
 
 
-    private void OnValidate() => Build(); // ����-���������� ��� ��������� ����������
+    private void OnValidate() => Build(); // Авто-обновление при изменении параметров
 
 
 
     [ContextMenu("Clear & Spawn Environment")]
     public void SpawnEnvironment()
     {
-        // ������� ������ ��������
+        // Очищаем старые объекты
         if (propsContainer == null)
         {
             propsContainer = new GameObject("Props").transform;
@@ -44,23 +44,23 @@ public class SmoothRoadGenerator : MonoBehaviour
         {
             if (Random.value > spawnProbability) continue;
 
-            // ��������� ������� � ����������
+            // Вычисляем позицию и поворот
             Vector3 pos = generatedPoints[i];
 
-            // ������� ����������� (�������) ��� ������� �����
+            // Вычисляем направление (касательную) для поворота объекта
             int nextIdx = (i + 1) % totalSteps;
             Vector3 tangent = (generatedPoints[nextIdx] - pos).normalized;
             Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
 
-            // �������� ������� (����/�����) � ��������� ������
+            // Выбираем сторону (лево/право) случайным образом
             float side = Random.value > 0.5f ? 1f : -1f;
             GameObject prefab = envPrefabs[Random.Range(0, envPrefabs.Length)];
 
-            // ������� ������
+            // Создаём объект
             Vector3 spawnPos = pos + right * (distanceFromCenter * side);
             GameObject prop = Instantiate(prefab, spawnPos, Quaternion.LookRotation(tangent), propsContainer);
 
-            // ��������� ������ �������� � ������� ��� ��������������
+            // Немного рандомизируем поворот и масштаб
             prop.transform.Rotate(0, Random.Range(0, 360f), 0);
             prop.transform.localScale *= Random.Range(0.8f, 1.2f);
         }
@@ -93,30 +93,30 @@ public class SmoothRoadGenerator : MonoBehaviour
                 Vector3 posWorld = GetCatmullRomPoint(p0, p1, p2, p3, t);
                 Vector3 posLocal = posWorld - transform.position;
 
-                centerPath.Add(posWorld); // ��������� ������� ������� ������
+                centerPath.Add(posWorld); // Сохраняем центральную точку дороги
 
                 Vector3 tangent = GetCatmullRomTangent(p0, p1, p2, p3, t);
                 Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
 
-                // �������
-                verts.Add(posLocal - right * roadWidth);                   // 0: ���� ���
-                verts.Add(posLocal + right * roadWidth);                   // 1: ����� ���
-                verts.Add(posLocal - right * roadWidth + Vector3.up * curbHeight); // 2: ���� ����
-                verts.Add(posLocal + right * roadWidth + Vector3.up * curbHeight); // 3: ����� ����
+                // Вершины
+                verts.Add(posLocal - right * roadWidth);                   // 0: левый низ
+                verts.Add(posLocal + right * roadWidth);                   // 1: правый низ
+                verts.Add(posLocal - right * roadWidth + Vector3.up * curbHeight); // 2: левый верх
+                verts.Add(posLocal + right * roadWidth + Vector3.up * curbHeight); // 3: правый верх
 
                 if (verts.Count > 4)
                 {
                     int curr = verts.Count - 4;
                     int prev = curr - 4;
-                    AddQuad(tris, prev + 0, prev + 1, curr + 0, curr + 1); // �������
-                    AddQuad(tris, prev + 2, prev + 3, curr + 2, curr + 3); // ���� �������
-                    AddQuad(tris, prev + 0, prev + 2, curr + 0, curr + 2); // ������ ����
-                    AddQuad(tris, prev + 3, prev + 1, curr + 3, curr + 1); // ������ �����
+                    AddQuad(tris, prev + 0, prev + 1, curr + 0, curr + 1); // дорога
+                    AddQuad(tris, prev + 2, prev + 3, curr + 2, curr + 3); // верх бордюра
+                    AddQuad(tris, prev + 0, prev + 2, curr + 0, curr + 2); // бок левый
+                    AddQuad(tris, prev + 3, prev + 1, curr + 3, curr + 1); // бок правый
                 }
             }
         }
 
-        // ��������� ������
+        // Замыкаем mesh
         int last = verts.Count - 4;
         AddQuad(tris, last + 0, last + 1, 0, 1);
         AddQuad(tris, last + 2, last + 3, 2, 3);
@@ -142,7 +142,7 @@ public class SmoothRoadGenerator : MonoBehaviour
     Vector3 GetCatmullRomTangent(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t) =>
         (0.5f * (-p0 + p2 + 2f * (2f * p0 - 5f * p1 + 4f * p2 - p3) * t + 3f * (-p0 + 3f * p1 - 3f * p2 + p3) * t * t)).normalized;
 
-    // ��������� ���� � ��������� (������� �����)
+    // Рисуем путь в редакторе (зелёная линия)
     private void OnDrawGizmos()
     {
         if (generatedPoints == null || generatedPoints.Length < 2) return;

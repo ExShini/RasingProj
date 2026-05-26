@@ -25,10 +25,10 @@ public class Car : MonoBehaviour
 
     public RoadWayPoint NextPoint;
 
-    // ��� ������, ������ ������ �������� �� ��� � ������� ������ ����� �����
+    // Все опорные точки, нужны чтобы проверять проехали мы их или ещё нет
     private RoadWayPoint[] _roadWayPoints;
 
-    // ���������������� ����� ������
+    // Детализированные точки пути
     private Vector3[] _roadPoints;
 
     private int _roadResolution;
@@ -98,7 +98,7 @@ public class Car : MonoBehaviour
 
         _abilityController.Update(Time.fixedDeltaTime);
 
-        // �������� ����� ���������� ���������
+        // Обновляем параметры перед обработкой
         UpdateBrainParameters();
 
         Brain.Process(currPosition, _rb.linearVelocity, transform.forward, nextWayPoint.Ind, closestPoint);
@@ -118,7 +118,7 @@ public class Car : MonoBehaviour
 
             int nextPointInd = NextPoint.Ind + 1;
 
-            // ���� ��������� ���� - ���������� ���������� �����
+            // Если дошли до конца - начинаем заново
             if(nextPointInd >= _roadWayPoints.Length)
             {
                 nextPointInd = 0;
@@ -141,7 +141,7 @@ public class Car : MonoBehaviour
 
         float minDistanceSqr = float.MaxValue;
 
-        // 1. ���� ��������� ������ � ������� ���������� �����
+        // 1. Сначала ищем ближайшую опорную точку
         for (int i = 0; i < _roadWayPoints.Length; i++)
         {
             float distSqr = (currentPos - _roadWayPoints[i].Position).sqrMagnitude;
@@ -153,8 +153,8 @@ public class Car : MonoBehaviour
             }
         }
 
-        // 2. �������� ��������� ����� ���������� �� ���� ��������� ���������
-        // ����� ������
+        // 2. Ищем самую близкую точку на участке между опорными
+        // точками дороги
 
         float closestDist = float.MaxValue;
         Vector3 closestPoint = Vector3.zero;
@@ -219,7 +219,7 @@ public class Car : MonoBehaviour
         damping *= Settings.RoadOffsetLinerDamping.Evaluate(dist);
         _rb.linearDamping = damping;
 
-        // ���������� ��������
+        // Обновляем скорость
         Speed = _rb.linearVelocity.magnitude;
 
         float forwardPower = Math.Clamp(Brain.Acceleration, -1f, 1f);
