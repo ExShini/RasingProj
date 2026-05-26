@@ -19,6 +19,9 @@ public class Car : MonoBehaviour
 
     [Space]
     public float Speed;
+    public float AngDrag;
+    public float SpeedDrag;
+    public float RoadDrag;
 
     [Space]
     public CarProcessor Brain;
@@ -214,23 +217,37 @@ public class Car : MonoBehaviour
 
         float forwAngle = Vector3.SignedAngle(transform.forward.normalized, _rb.linearVelocity.normalized, Vector3.up);
         float absForwAngle = math.abs(forwAngle);
+        float speed = _rb.linearVelocity.magnitude;
 
-        var damping = Settings.CarDampingByAngle.Evaluate(absForwAngle);
-        damping *= Settings.RoadOffsetLinerDamping.Evaluate(dist);
-        _rb.linearDamping = damping;
+        // Суммарное сопротивление = угловой компонент + скоростной компонент
+        float angleDrag = Settings.CarDampingByAngle.Evaluate(absForwAngle) * speed;
+        float speedDrag = Settings.DragBySpeed.Evaluate(speed);
+        float totalAirDrag = angleDrag + speedDrag;
 
-        // Обновляем скорость
-        Speed = _rb.linearVelocity.magnitude;
+        // Трение о дорогу (базовая стабильность)
+        _rb.linearDamping = Settings.RoadOffsetLinerDamping.Evaluate(dist);
+
+        // Явная сила сопротивления воздуха против направления скорости
+        if (speed > 0.01f && totalAirDrag > 0f)
+        {
+            _rb.AddForce(-_rb.linearVelocity.normalized * totalAirDrag, ForceMode.Force);
+        }
+
+        SpeedDrag = speedDrag;
+        AngDrag = angleDrag;
+        RoadDrag = _rb.linearDamping;
+
+        Speed = speed;
 
         float forwardPower = Math.Clamp(Brain.Acceleration, -1f, 1f);
         float powerMultiplier = _abilityController.GetPowerMultiplier();
-        Vector3 moveForce = Settings.EnginePower * forwardPower * powerMultiplier * Vector3.forward;
+        Vector3 moveForce = Settings.EnginePower * forwardPower * powerMultiplier * this.transform.forward;
 
         var maxRotationAngle = Settings.MaxRoatationAngle.Evaluate(Speed) * Time.deltaTime;
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
 
         transform.Rotate(0, angle, 0);
-        _rb.AddRelativeForce(moveForce);
+        _rb.AddForce(moveForce);
     }
 
     private void OnDrawGizmos()

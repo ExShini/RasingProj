@@ -5,7 +5,11 @@ public class CarSettings : ScriptableObject
 {
     public float EnginePower;
     public AnimationCurve MaxRoatationAngle;
+
+    [Header("Сцепление с дорогой")]
     public AnimationCurve RoadOffsetLinerDamping;
+
+    [Header("Сопротивление воздуха")]
     public AnimationCurve CarDampingByAngle;
-    
+    public AnimationCurve DragBySpeed;
 }

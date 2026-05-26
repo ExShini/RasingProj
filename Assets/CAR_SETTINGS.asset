@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 123aeb3aa5123bc4d93c63403359fe64, type: 3}
   m_Name: CAR_SETTINGS
   m_EditorClassIdentifier: Assembly-CSharp::CarSettings
-  EnginePower: 250
+  EnginePower: 3
   MaxRoatationAngle:
     serializedVersion: 2
     m_Curve:
@@ -51,7 +51,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0.00071159814
       outSlope: 0.00071159814
       tangentMode: 0
@@ -60,7 +60,7 @@ MonoBehaviour:
       outWeight: 0.5866667
     - serializedVersion: 3
       time: 4
-      value: 1.25
+      value: 0.2
       inSlope: -0.00045968822
       outSlope: -0.00045968822
       tangentMode: 0
@@ -75,7 +75,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 2
+      value: 0
       inSlope: -0.00017179982
       outSlope: -0.00017179982
       tangentMode: 0
@@ -84,22 +84,46 @@ MonoBehaviour:
       outWeight: 0.3384616
     - serializedVersion: 3
       time: 90
-      value: 7.5
-      inSlope: 0.060114596
-      outSlope: -0.061568122
+      value: 1
+      inSlope: 0.024793422
+      outSlope: -0.02412397
       tangentMode: 1
       weightedMode: 0
-      inWeight: 1
-      outWeight: 0.9897439
+      inWeight: 0.44772127
+      outWeight: 0.0911527
     - serializedVersion: 3
       time: 180
-      value: 2
+      value: 0
       inSlope: -0.000113387956
       outSlope: -0.000113387956
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.51282024
       outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  DragBySpeed:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.021087646
+      inSlope: 0.014049292
+      outSlope: 0.014049292
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.1535217
+    - serializedVersion: 3
+      time: 30
+      value: 4.0259094
+      inSlope: 0.23509261
+      outSlope: 0.23509261
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.14634368
+      outWeight: 0.33333334
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
