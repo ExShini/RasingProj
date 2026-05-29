@@ -12,4 +12,8 @@ public class CarSettings : ScriptableObject
     [Header("Сопротивление воздуха")]
     public AnimationCurve CarDampingByAngle;
     public AnimationCurve DragBySpeed;
+
+    [Header("Перенаправление импульса при повороте")]
+    [Tooltip("Доля боковой скорости, перенаправляемая вперёд за секунду (по скорости машины). 0 = нет перенаправления, 1 = мгновенное")]
+    public AnimationCurve TurnMomentumRedirect;
 }

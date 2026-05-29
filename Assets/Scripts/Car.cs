@@ -247,6 +247,28 @@ public class Car : MonoBehaviour
         var angle = Math.Clamp(Brain.AngleRotation, -maxRotationAngle, maxRotationAngle);
 
         transform.Rotate(0, angle, 0);
+
+        if (speed > 0.1f && Mathf.Abs(angle) > 0.0001f)
+        {
+            float fwdSpeed = Vector3.Dot(_rb.linearVelocity, transform.forward);
+            Vector3 lateralVelocity = _rb.linearVelocity - transform.forward * fwdSpeed;
+            float lateralSpeed = lateralVelocity.magnitude;
+
+            if (lateralSpeed > 0.01f)
+            {
+                float turnIntensity = Mathf.Abs(angle) / (maxRotationAngle + 0.001f);
+                turnIntensity = Mathf.Clamp01(turnIntensity);
+
+                float redirectRate = Settings.TurnMomentumRedirect.Evaluate(speed);
+
+                float redirectAmount = lateralSpeed * redirectRate * turnIntensity * Time.deltaTime;
+                redirectAmount = Mathf.Min(redirectAmount, lateralSpeed);
+
+                _rb.AddForce(-lateralVelocity.normalized * redirectAmount, ForceMode.VelocityChange);
+                _rb.AddForce(transform.forward * redirectAmount, ForceMode.VelocityChange);
+            }
+        }
+
         _rb.AddForce(moveForce);
     }
 
