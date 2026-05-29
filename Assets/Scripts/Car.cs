@@ -28,6 +28,8 @@ public class Car : MonoBehaviour
 
     public RoadWayPoint NextPoint;
 
+    public int LapCount;
+
     // Все опорные точки, нужны чтобы проверять проехали мы их или ещё нет
     private RoadWayPoint[] _roadWayPoints;
 
@@ -125,10 +127,12 @@ public class Car : MonoBehaviour
             if(nextPointInd >= _roadWayPoints.Length)
             {
                 nextPointInd = 0;
+                LapCount++;
                 for(int i = 0; i < _roadWayPoints.Length; i++)
                 {
                     var pointToReset = _roadWayPoints[i];
                     pointToReset.Achived = false;
+                    _roadWayPoints[i] = pointToReset;
                 }
             }
 
